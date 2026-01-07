@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>경영관리팀 Request Board</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: #f5f6f8;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* 헤더 */
+    header {
+      background-color: #045b67;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-date {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .header-title {
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .btn-new {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #045b67;
+      background-color: #efd487;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-new:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(4, 91, 103, 0.3);
+    }
+
+    /* 메인 */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 40px 40px;
+    }
+
+    /* 통계 카드 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .stat-value.teal { color: #045b67; }
+    .stat-value.green { color: #2e7d32; }
+    .stat-value.indigo { color: #4a6d83; }
+
+    /* 필터 & 검색 바 */
+    .filter-bar {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 16px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-tab {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .filter-tab:hover {
+      background-color: #e8e8e8;
+    }
+
+    .filter-tab.active {
+      background-color: #045b67;
+      color: #ffffff;
+    }
+
+    .filter-count {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background-color: #e0e0e0;
+      color: #888;
+    }
+
+    .filter-tab.active .filter-count {
+      background-color: rgba(255,255,255,0.2);
+      color: #ffffff;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e8e8e8;
+      width: 280px;
+    }
+
+    .search-box input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13px;
+      color: #333;
+      width: 100%;
+    }
+
+    .search-box input::placeholder {
+      color: #aaa;
+    }
+
+    .search-clear {
+      background: none;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      display: none;
+    }
+
+    .search-clear.visible {
+      display: block;
+    }
+
+    /* 테이블 컨테이너 */
+    .table-container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .section-header {
+      padding: 16px 24px;
+      background-color: #fafbfc;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-header.completed {
+      border-top: 1px solid #eee;
+    }
+
+    .section-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #045b67;
+    }
+
+    .section-dot.gray {
+      background-color: #aaa;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .section-title.gray {
+      color: #888;
+    }
+
+    /* 테이블 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    th.center { text-align: center; }
+
+    tbody tr {
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.15s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #fcfcfc;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafb !important;
+    }
+
+    tbody tr.completed-row {
+      opacity: 0.6;
+    }
+
+    td {
+      padding: 18px 20px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    td.date {
+      font-size: 13px;
+      color: #666;
+      font-variant-numeric: tabular-nums;
+      width: 110px;
+    }
+
+    td.star {
+      text-align: center;
+      width: 50px;
+      padding: 18px 12px;
+    }
+
+    td.content {
+      font-weight: 500;
+      width: 240px;
+    }
+
+    td.status {
+      text-align: center;
+      width: 140px;
+      padding: 18px 16px;
+    }
+
+    td.complete {
+      text-align: center;
+      width: 50px;
+      padding: 18px 12px;
+    }
+
+    td.reply {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+      cursor: pointer;
+    }
+
+    td.reply:hover {
+      background-color: #f0f7f8 !important;
+    }
+
+    td.reply.empty {
+      color: #ccc;
+    }
+
+    td.delete {
+      width: 40px;
+      padding: 18px 8px;
+    }
+
+    /* 별표 버튼 */
+    .star-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 18px;
+      color: #ddd;
+      transition: transform 0.15s ease;
+    }
+
+    .star-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .star-btn.active {
+      color: #efd487;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    }
+
+    /* 상태 셀렉트 */
+    .status-select {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .status-select.default {
+      background-color: #f5f5f5;
+      color: #888;
+    }
+
+    .status-select.checking {
+      background-color: #fef9e7;
+      color: #c9a227;
+    }
+
+    .status-select.waiting {
+      background-color: #e8f4f6;
+      color: #045b67;
+    }
+
+    /* 완료 뱃지 */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #2e7d32;
+    }
+
+    /* 체크박스 버튼 */
+    .checkbox-btn {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #d0d0d0;
+      border-radius: 6px;
+      background-color: #fff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .checkbox-btn:hover {
+      border-color: #045b67;
+    }
+
+    .checkbox-btn.checked {
+      background-color: #045b67;
+      border-color: #045b67;
+    }
+
+    /* 삭제 버튼 */
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    tbody tr:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      color: #e57373;
+    }
+
+    /* 회신 입력 */
+    .reply-input-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .reply-input {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 13px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .reply-save-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      background-color: #045b67;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .reply-cancel-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      background-color: #f0f0f0;
+      color: #666;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* 빈 상태 */
+    .empty-state {
+      padding: 60px 24px;
+      text-align: center;
+      color: #aaa;
+    }
+
+    .empty-state p {
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .empty-state button {
+      padding: 10px 20px;
+      font-size: 14px;
+      background-color: #045b67;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* 푸터 */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #eee;
+      padding: 12px 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    footer span {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    footer .divider {
+      color: #ddd;
+      margin: 0 8px;
+    }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #4caf50;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #4caf50;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* 모달 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 24px;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .modal textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+      font-size: 14px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      outline: none;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .modal-cancel {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      background-color: #f5f5f5;
+      color: #666;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .modal-submit {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      background-color: #045b67;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* 완료 항목 스타일 */
+    .completed-content {
+      text-decoration: line-through;
+      color: #999 !important;
+    }
+
+    .completed-date {
+      color: #999 !important;
+    }
+
+    .completed-reply {
+      color: #999 !important;
+    }
+
+    /* 로딩 */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f5f6f8;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e0e0e0;
+      border-top-color: #045b67;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 반응형 */
+    @media (max-width: 900px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .filter-bar {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      main, .header-content, footer {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 12px 10px;
+      }
+
+      td.content {
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 로딩 화면 -->
+  <div class="loading" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <span style="color: #888; font-size: 14px;">데이터 불러오는 중...</span>
+  </div>
+
+  <!-- 메인 앱 -->
+  <div id="app" style="display: none;">
+    <!-- 헤더 -->
+    <header>
+      <div class="header-content">
+        <div>
+          <p class="header-date" id="todayDate"></p>
+          <h1 class="header-title">경영관리팀 Request Board</h1>
+        </div>
+        <button class="btn-new" onclick="openModal()">
+          <span style="font-size: 18px;">+</span> 새 요청
+        </button>
+      </div>
+    </header>
+
+    <!-- 메인 -->
+    <main>
+      <!-- 통계 카드 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <p class="stat-label">전체 요청</p>
+          <p class="stat-value" id="statTotal">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">진행 중</p>
+          <p class="stat-value teal" id="statActive">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">완료</p>
+          <p class="stat-value green" id="statCompleted">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">완료율</p>
+          <p class="stat-value indigo" id="statRate">0%</p>
+        </div>
+      </div>
+
+      <!-- 필터 & 검색 -->
+      <div class="filter-bar">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">
+            전체 <span class="filter-count" id="countAll">0</span>
+          </button>
+          <button class="filter-tab" data-filter="active" onclick="setFilter('active')">
+            진행 중 <span class="filter-count" id="countActive">0</span>
+          </button>
+          <button class="filter-tab" data-filter="completed" onclick="setFilter('completed')">
+            완료 <span class="filter-count" id="countCompleted">0</span>
+          </button>
+        </div>
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="검색어를 입력하세요" oninput="handleSearch()">
+          <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
+        </div>
+      </div>
+
+      <!-- 테이블 -->
+      <div class="table-container">
+        <div id="tableContent"></div>
+      </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer>
+      <div class="sync-status">
+        <div class="sync-dot"></div>
+        <span>실시간 동기화</span>
+      </div>
+      <span class="divider">|</span>
+      <span>팀원과 자동으로 공유됩니다</span>
+    </footer>
+  </div>
+
+  <!-- 모달 -->
+  <div class="modal-overlay" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h2>새 확인요청</h2>
+      <textarea id="newRequestContent" placeholder="요청 내용을 입력하세요..."></textarea>
+      <div class="modal-buttons">
+        <button class="modal-cancel" onclick="closeModal()">취소</button>
+        <button class="modal-submit" onclick="addRequest()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase 설정 (기존 프로젝트 사용)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDT4l9pSx3ozpcvPzRtfdCwNI0KqMxSk2s",
+      authDomain: "order-d03ce.firebaseapp.com",
+      projectId: "order-d03ce",
+      storageBucket: "order-d03ce.firebasestorage.app",
+      messagingSenderId: "930014374996",
+      appId: "1:930014374996:web:67d764f5bc946d1781d1c1",
+      measurementId: "G-XQ05G0D196"
+    };
+
+    // Firebase 초기화
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 컬렉션 이름
+    const COLLECTION = 'request-board';
+
+    // 상태
+    let requests = [];
+    let currentFilter = 'all';
+    let searchTerm = '';
+    let editingReplyId = null;
+
+    // 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      updateTodayDate();
+      setupRealtimeListener();
+    });
+
+    // 오늘 날짜 표시
+    function updateTodayDate() {
+      const today = new Date();
+      const formatted = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+      document.getElementById('todayDate').textContent = formatted;
+    }
+
+    // 실시간 리스너 설정
+    function setupRealtimeListener() {
+      db.collection(COLLECTION)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot((snapshot) => {
+          requests = [];
+          snapshot.forEach((doc) => {
+            requests.push({ id: doc.id, ...doc.data() });
+          });
+          
+          // 로딩 화면 숨기고 앱 표시
+          document.getElementById('loadingScreen').style.display = 'none';
+          document.getElementById('app').style.display = 'block';
+          
+          render();
+        }, (error) => {
+          console.error('Firestore 오류:', error);
+          alert('데이터를 불러오는 중 오류가 발생했습니다.');
+        });
+    }
+
+    // 필터 설정
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.filter === filter);
+      });
+      render();
+    }
+
+    // 검색
+    function handleSearch() {
+      searchTerm = document.getElementById('searchInput').value;
+      document.getElementById('searchClear').classList.toggle('visible', searchTerm.length > 0);
+      render();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      searchTerm = '';
+      document.getElementById('searchClear').classList.remove('visible');
+      render();
+    }
+
+    // 모달
+    function openModal() {
+      document.getElementById('modal').classList.add('visible');
+      document.getElementById('newRequestContent').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('visible');
+      document.getElementById('newRequestContent').value = '';
+    }
+
+    // 새 요청 추가
+    async function addRequest() {
+      const content = document.getElementById('newRequestContent').value.trim();
+      if (!content) return;
+
+      const today = new Date().toISOString().split('T')[0];
+      
+      try {
+        await db.collection(COLLECTION).add({
+          date: today,
+          content: content,
+          reply: '',
+          status: '-',
+          important: false,
+          completed: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        closeModal();
+      } catch (error) {
+        console.error('추가 오류:', error);
+        alert('요청 추가 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 중요 토글
+    async function toggleImportant(id) {
+      const request = requests.find(r => r.id === id);
+      if (request) {
+        try {
+          await db.collection(COLLECTION).doc(id).update({
+            important: !request.important
+          });
+        } catch (error) {
+          console.error('업데이트 오류:', error);
+        }
+      }
+    }
+
+    // 상태 변경
+    async function updateStatus(id, status) {
+      try {
+        await db.collection(COLLECTION).doc(id).update({ status: status });
+      } catch (error) {
+        console.error('상태 변경 오류:', error);
+      }
+    }
+
+    // 완료 토글
+    async function toggleComplete(id) {
+      const request = requests.find(r => r.id === id);
+      if (request) {
+        try {
+          await db.collection(COLLECTION).doc(id).update({
+            completed: !request.completed
+          });
+        } catch (error) {
+          console.error('완료 토글 오류:', error);
+        }
+      }
+    }
+
+    // 회신 편집 시작
+    function startEditReply(id) {
+      editingReplyId = id;
+      render();
+      const input = document.getElementById('replyInput-' + id);
+      if (input) input.focus();
+    }
+
+    // 회신 저장
+    async function saveReply(id) {
+      const input = document.getElementById('replyInput-' + id);
+      if (input) {
+        try {
+          await db.collection(COLLECTION).doc(id).update({
+            reply: input.value
+          });
+        } catch (error) {
+          console.error('회신 저장 오류:', error);
+        }
+      }
+      editingReplyId = null;
+      render();
+    }
+
+    // 회신 편집 취소
+    function cancelEditReply() {
+      editingReplyId = null;
+      render();
+    }
+
+    // 삭제
+    async function deleteRequest(id) {
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+      
+      try {
+        await db.collection(COLLECTION).doc(id).delete();
+      } catch (error) {
+        console.error('삭제 오류:', error);
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 필터링된 데이터 가져오기
+    function getFilteredData() {
+      let filtered = requests;
+
+      // 검색 필터
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(r => 
+          r.content.toLowerCase().includes(term) ||
+          (r.reply && r.reply.toLowerCase().includes(term))
+        );
+      }
+
+      // 상태 필터
+      if (currentFilter === 'active') {
+        return { active: filtered.filter(r => !r.completed), completed: [] };
+      }
+      if (currentFilter === 'completed') {
+        return { active: [], completed: filtered.filter(r => r.completed) };
+      }
+      return {
+        active: filtered.filter(r => !r.completed),
+        completed: filtered.filter(r => r.completed)
+      };
+    }
+
+    // 상태 클래스 가져오기
+    function getStatusClass(status) {
+      if (status === '확인 중') return 'checking';
+      if (status === '확인 후 회신대기') return 'waiting';
+      return 'default';
+    }
+
+    // 렌더링
+    function render() {
+      const data = getFilteredData();
+      const activeCount = requests.filter(r => !r.completed).length;
+      const completedCount = requests.filter(r => r.completed).length;
+
+      // 통계 업데이트
+      document.getElementById('statTotal').textContent = requests.length;
+      document.getElementById('statActive').textContent = activeCount;
+      document.getElementById('statCompleted').textContent = completedCount;
+      document.getElementById('statRate').textContent = requests.length > 0 
+        ? Math.round((completedCount / requests.length) * 100) + '%' 
+        : '0%';
+
+      // 필터 카운트 업데이트
+      document.getElementById('countAll').textContent = requests.length;
+      document.getElementById('countActive').textContent = activeCount;
+      document.getElementById('countCompleted').textContent = completedCount;
+
+      // 테이블 렌더링
+      let html = '';
+
+      // 진행 중 섹션
+      if (data.active.length > 0) {
+        html += `
+          <div class="section-header">
+            <div class="section-dot"></div>
+            <span class="section-title">진행 중</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 110px;">날짜</th>
+                <th class="center" style="width: 50px;">중요</th>
+                <th style="width: 240px;">요청내용</th>
+                <th class="center" style="width: 140px;">상태</th>
+                <th class="center" style="width: 50px;">완료</th>
+                <th>회신내역</th>
+                <th style="width: 40px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        // 중요 항목 먼저 정렬
+        const sortedActive = [...data.active].sort((a, b) => b.important - a.important);
+        
+        sortedActive.forEach(item => {
+          const isEditing = editingReplyId === item.id;
+          html += `
+            <tr>
+              <td class="date">${item.date}</td>
+              <td class="star">
+                <button class="star-btn ${item.important ? 'active' : ''}" onclick="toggleImportant('${item.id}')">★</button>
+              </td>
+              <td class="content">${escapeHtml(item.content)}</td>
+              <td class="status">
+                <select class="status-select ${getStatusClass(item.status)}" onchange="updateStatus('${item.id}', this.value)">
+                  <option value="-" ${item.status === '-' ? 'selected' : ''}>-</option>
+                  <option value="확인 중" ${item.status === '확인 중' ? 'selected' : ''}>확인 중</option>
+                  <option value="확인 후 회신대기" ${item.status === '확인 후 회신대기' ? 'selected' : ''}>확인 후 회신대기</option>
+                </select>
+              </td>
+              <td class="complete">
+                <button class="checkbox-btn" onclick="toggleComplete('${item.id}')"></button>
+              </td>
+              <td class="reply ${item.reply ? '' : 'empty'}" ${isEditing ? '' : `onclick="startEditReply('${item.id}')"`}>
+                ${isEditing ? `
+                  <div class="reply-input-wrapper" onclick="event.stopPropagation()">
+                    <input type="text" class="reply-input" id="replyInput-${item.id}" value="${escapeHtml(item.reply || '')}" onkeypress="if(event.key==='Enter')saveReply('${item.id}')">
+                    <button class="reply-save-btn" onclick="saveReply('${item.id}')">저장</button>
+                    <button class="reply-cancel-btn" onclick="cancelEditReply()">취소</button>
+                  </div>
+                ` : (item.reply || '클릭하여 회신 입력...')}
+              </td>
+              <td class="delete">
+                <button class="delete-btn" onclick="deleteRequest('${item.id}')">×</button>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += '</tbody></table>';
+      }
+
+      // 완료 섹션
+      if (data.completed.length > 0) {
+        html += `
+          <div class="section-header ${data.active.length > 0 ? 'completed' : ''}">
+            <div class="section-dot gray"></div>
+            <span class="section-title gray">완료</span>
+          </div>
+          <table>
+            <tbody>
+        `;
+
+        data.completed.forEach(item => {
+          html += `
+            <tr class="completed-row">
+              <td class="date completed-date" style="width: 110px;">${item.date}</td>
+              <td class="star" style="width: 50px;">
+                <span style="color: ${item.important ? '#efd487' : '#e0e0e0'}; font-size: 18px;">★</span>
+              </td>
+              <td class="content completed-content" style="width: 240px;">${escapeHtml(item.content)}</td>
+              <td class="status" style="width: 140px;">
+                <span class="status-badge">
+                  <span class="dot"></span>
+                  완료
+                </span>
+              </td>
+              <td class="complete" style="width: 50px;">
+                <button class="checkbox-btn checked" onclick="toggleComplete('${item.id}')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </button>
+              </td>
+              <td class="reply completed-reply">${item.reply || '-'}</td>
+              <td class="delete" style="width: 40px;">
+                <button class="delete-btn" onclick="deleteRequest('${item.id}')">×</button>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += '</tbody></table>';
+      }
+
+      // 빈 상태
+      if (data.active.length === 0 && data.completed.length === 0) {
+        html = `
+          <div class="empty-state">
+            <p>${searchTerm ? '검색 결과가 없습니다' : '등록된 요청이 없습니다'}</p>
+            ${!searchTerm ? '<button onclick="openModal()">+ 새 요청 추가</button>' : ''}
+          </div>
+        `;
+      }
+
+      document.getElementById('tableContent').innerHTML = html;
+    }
+
+    // HTML 이스케이프
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
