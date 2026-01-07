@@ -115,6 +115,13 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
+      gap: 12px;
+    }
+
+    .filters-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
     }
 
     .filter-tabs {
@@ -123,6 +130,11 @@
       border-radius: 8px;
       padding: 4px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .author-filter .filter-tab.active {
+      background-color: #efd487;
+      color: #333;
     }
 
     .filter-tab {
@@ -155,6 +167,10 @@
 
     .filter-tab.active .filter-count {
       background-color: rgba(255,255,255,0.2);
+    }
+
+    .author-filter .filter-tab.active .filter-count {
+      background-color: rgba(0,0,0,0.1);
     }
 
     .filter-tab:not(.active) .filter-count {
@@ -666,6 +682,11 @@
         align-items: stretch;
       }
 
+      .filters-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+
       .search-box {
         width: 100%;
       }
@@ -721,16 +742,30 @@
 
       <!-- 필터 / 검색 -->
       <div class="controls">
-        <div class="filter-tabs">
-          <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">
-            전체<span class="filter-count" id="filterAll">0</span>
-          </button>
-          <button class="filter-tab" data-filter="pending" onclick="setFilter('pending')">
-            진행 중<span class="filter-count" id="filterPending">0</span>
-          </button>
-          <button class="filter-tab" data-filter="completed" onclick="setFilter('completed')">
-            완료<span class="filter-count" id="filterCompleted">0</span>
-          </button>
+        <div class="filters-row">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">
+              전체<span class="filter-count" id="filterAll">0</span>
+            </button>
+            <button class="filter-tab" data-filter="pending" onclick="setFilter('pending')">
+              진행 중<span class="filter-count" id="filterPending">0</span>
+            </button>
+            <button class="filter-tab" data-filter="completed" onclick="setFilter('completed')">
+              완료<span class="filter-count" id="filterCompleted">0</span>
+            </button>
+          </div>
+
+          <div class="filter-tabs author-filter">
+            <button class="filter-tab active" data-author="all" onclick="setAuthorFilter('all')">
+              전체<span class="filter-count" id="filterAuthorAll">0</span>
+            </button>
+            <button class="filter-tab" data-author="NY" onclick="setAuthorFilter('NY')">
+              NY<span class="filter-count" id="filterNY">0</span>
+            </button>
+            <button class="filter-tab" data-author="YJ" onclick="setAuthorFilter('YJ')">
+              YJ<span class="filter-count" id="filterYJ">0</span>
+            </button>
+          </div>
         </div>
 
         <div class="search-box">
@@ -852,6 +887,7 @@
     // 상태
     let requests = [];
     let currentFilter = 'all';
+    let currentAuthorFilter = 'all';
     let searchTerm = '';
     let editingContentId = null;
     let editingReplyId = null;
@@ -893,8 +929,16 @@
 
     function setFilter(filter) {
       currentFilter = filter;
-      document.querySelectorAll('.filter-tab').forEach(tab => {
+      document.querySelectorAll('.filter-tabs:not(.author-filter) .filter-tab').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.filter === filter);
+      });
+      render();
+    }
+
+    function setAuthorFilter(author) {
+      currentAuthorFilter = author;
+      document.querySelectorAll('.author-filter .filter-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.author === author);
       });
       render();
     }
@@ -1141,6 +1185,11 @@
         filtered = filtered.filter(r => r.completed);
       }
 
+      // 작성자 필터
+      if (currentAuthorFilter !== 'all') {
+        filtered = filtered.filter(r => r.author === currentAuthorFilter);
+      }
+
       const pending = filtered.filter(r => !r.completed);
       const completed = filtered.filter(r => r.completed);
 
@@ -1150,6 +1199,10 @@
       const totalCompleted = requests.filter(r => r.completed).length;
       const rate = total > 0 ? Math.round((totalCompleted / total) * 100) : 0;
 
+      // 작성자별 카운트
+      const totalNY = requests.filter(r => r.author === 'NY').length;
+      const totalYJ = requests.filter(r => r.author === 'YJ').length;
+
       document.getElementById('totalCount').textContent = total;
       document.getElementById('pendingCount').textContent = totalPending;
       document.getElementById('completedCount').textContent = totalCompleted;
@@ -1158,6 +1211,10 @@
       document.getElementById('filterAll').textContent = total;
       document.getElementById('filterPending').textContent = totalPending;
       document.getElementById('filterCompleted').textContent = totalCompleted;
+
+      document.getElementById('filterAuthorAll').textContent = total;
+      document.getElementById('filterNY').textContent = totalNY;
+      document.getElementById('filterYJ').textContent = totalYJ;
 
       // 테이블 렌더
       renderTable('pendingTbody', pending, 'pendingEmpty');
