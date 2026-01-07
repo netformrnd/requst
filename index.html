@@ -528,6 +528,36 @@
       margin-bottom: 20px;
     }
 
+    .modal-author-select {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .modal-author-select label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .author-select-modal {
+      padding: 10px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      background: #fff;
+      cursor: pointer;
+      outline: none;
+      min-width: 100px;
+    }
+
+    .author-select-modal:focus {
+      border-color: #045b67;
+    }
+
     .modal p {
       color: #666;
       margin-bottom: 20px;
@@ -844,6 +874,14 @@
   <div class="modal-overlay" id="newModal" onclick="closeNewModal()">
     <div class="modal" onclick="event.stopPropagation()" onkeydown="if(event.key==='Escape')closeNewModal();">
       <h2>새 확인요청</h2>
+      <div class="modal-author-select">
+        <label for="newAuthor">작성자</label>
+        <select id="newAuthor" class="author-select-modal">
+          <option value="">선택</option>
+          <option value="NY">NY</option>
+          <option value="YJ">YJ</option>
+        </select>
+      </div>
       <textarea id="newContent" placeholder="요청 내용을 입력하세요..." onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();addRequest();}"></textarea>
       <div class="modal-buttons">
         <button class="modal-cancel" onclick="closeNewModal()">취소</button>
@@ -965,10 +1003,12 @@
     function closeNewModal() {
       document.getElementById('newModal').classList.remove('visible');
       document.getElementById('newContent').value = '';
+      document.getElementById('newAuthor').value = '';
     }
 
     async function addRequest() {
       const content = document.getElementById('newContent').value.trim();
+      const author = document.getElementById('newAuthor').value;
       if (!content) return;
 
       const today = new Date().toISOString().split('T')[0];
@@ -981,7 +1021,7 @@
           status: '-',
           important: false,
           completed: false,
-          author: '',
+          author: author,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         closeNewModal();
