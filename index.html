@@ -292,14 +292,43 @@
       font-size: 13px;
       color: #666;
       font-variant-numeric: tabular-nums;
-      width: 80px;
+      width: 100px;
       white-space: nowrap;
       text-align: center;
     }
 
+    td.author {
+      text-align: center;
+      width: 70px;
+      white-space: nowrap;
+    }
+
+    .author-select {
+      padding: 6px 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      background: #fff;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .author-select:hover {
+      border-color: #045b67;
+    }
+
+    .author-select:focus {
+      border-color: #045b67;
+      box-shadow: 0 0 0 2px rgba(4, 91, 103, 0.1);
+    }
+
     td.star {
       text-align: center;
-      width: 50px;
+      width: 60px;
+      white-space: nowrap;
     }
 
     td.content {
@@ -319,7 +348,8 @@
 
     td.complete {
       text-align: center;
-      width: 50px;
+      width: 60px;
+      white-space: nowrap;
     }
 
     td.reply {
@@ -723,6 +753,7 @@
           <thead>
             <tr>
               <th class="center">날짜</th>
+              <th class="center">작성자</th>
               <th class="center">중요</th>
               <th>요청내용</th>
               <th class="center">상태</th>
@@ -746,6 +777,7 @@
           <thead>
             <tr>
               <th class="center">날짜</th>
+              <th class="center">작성자</th>
               <th class="center">중요</th>
               <th>요청내용</th>
               <th class="center">상태</th>
@@ -905,6 +937,7 @@
           status: '-',
           important: false,
           completed: false,
+          author: '',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         closeNewModal();
@@ -981,6 +1014,17 @@
         } catch (error) {
           console.error('완료 업데이트 오류:', error);
         }
+      }
+    }
+
+    // 작성자 변경
+    async function changeAuthor(id, author) {
+      try {
+        await db.collection(COLLECTION).doc(id).update({
+          author: author
+        });
+      } catch (error) {
+        console.error('작성자 업데이트 오류:', error);
       }
     }
 
@@ -1135,6 +1179,13 @@
       tbody.innerHTML = items.map(r => `
         <tr class="${r.completed ? 'completed-row' : ''}">
           <td class="date">${formatDate(r.date)}</td>
+          <td class="author">
+            <select class="author-select" onchange="changeAuthor('${r.id}', this.value)">
+              <option value="" ${!r.author ? 'selected' : ''}>-</option>
+              <option value="NY" ${r.author === 'NY' ? 'selected' : ''}>NY</option>
+              <option value="YJ" ${r.author === 'YJ' ? 'selected' : ''}>YJ</option>
+            </select>
+          </td>
           <td class="star">
             <button class="star-btn ${r.important ? 'active' : ''}" onclick="toggleImportant('${r.id}')">
               ${r.important ? '★' : '☆'}
