@@ -265,6 +265,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
     }
 
     thead tr {
@@ -283,6 +284,16 @@
     }
 
     th.center { text-align: center; }
+
+    /* 고정 열 너비 */
+    th:nth-child(1), td:nth-child(1) { width: 80px; }   /* 날짜 */
+    th:nth-child(2), td:nth-child(2) { width: 80px; }   /* 작성자 */
+    th:nth-child(3), td:nth-child(3) { width: 60px; }   /* 중요 */
+    th:nth-child(4), td:nth-child(4) { width: 30%; }    /* 요청내용 */
+    th:nth-child(5), td:nth-child(5) { width: 90px; }   /* 상태 */
+    th:nth-child(6), td:nth-child(6) { width: 30%; }    /* 회신내역 */
+    th:nth-child(7), td:nth-child(7) { width: 60px; }   /* 완료 */
+    th:nth-child(8), td:nth-child(8) { width: 60px; }   /* 삭제 */
 
     tbody tr {
       transition: all 0.15s ease;
@@ -308,15 +319,14 @@
       font-size: 13px;
       color: #666;
       font-variant-numeric: tabular-nums;
-      width: 100px;
       white-space: nowrap;
       text-align: center;
     }
 
     td.author {
       text-align: center;
-      width: 70px;
       white-space: nowrap;
+      overflow: visible;
     }
 
     .author-select {
@@ -343,14 +353,16 @@
 
     td.star {
       text-align: center;
-      width: 60px;
       white-space: nowrap;
     }
 
     td.content {
       font-weight: 500;
-      min-width: 200px;
+      font-size: 13px;
       cursor: pointer;
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.5;
     }
 
     td.content:hover {
@@ -359,21 +371,20 @@
 
     td.status {
       text-align: center;
-      width: 110px;
     }
 
     td.complete {
       text-align: center;
-      width: 60px;
       white-space: nowrap;
     }
 
     td.reply {
       font-size: 13px;
       color: #555;
-      line-height: 1.6;
+      line-height: 1.5;
       cursor: pointer;
-      min-width: 180px;
+      white-space: normal;
+      word-break: break-word;
     }
 
     td.reply:hover {
@@ -385,7 +396,6 @@
     }
 
     td.actions {
-      width: 50px;
       text-align: center;
     }
 
@@ -447,6 +457,11 @@
     .status-badge.waiting {
       background: #fff3e0;
       color: #f57c00;
+    }
+
+    .status-badge.completed-status {
+      background: #e8f5e9;
+      color: #388e3c;
     }
 
     /* 완료 체크박스 */
@@ -790,10 +805,10 @@
               전체<span class="filter-count" id="filterAuthorAll">0</span>
             </button>
             <button class="filter-tab" data-author="NY" onclick="setAuthorFilter('NY')">
-              NY<span class="filter-count" id="filterNY">0</span>
+              NY확인<span class="filter-count" id="filterNY">0</span>
             </button>
             <button class="filter-tab" data-author="YJ" onclick="setAuthorFilter('YJ')">
-              YJ<span class="filter-count" id="filterYJ">0</span>
+              YJ확인<span class="filter-count" id="filterYJ">0</span>
             </button>
           </div>
         </div>
@@ -898,6 +913,30 @@
       <div class="modal-buttons">
         <button class="modal-cancel" onclick="closeDeleteModal()">취소</button>
         <button class="modal-submit danger" onclick="confirmDelete()">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 요청내용 수정 모달 -->
+  <div class="modal-overlay" id="editContentModal" onclick="closeEditContentModal()">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 520px;">
+      <h2>요청내용 수정</h2>
+      <textarea id="editContentText" placeholder="요청 내용을 입력하세요..." style="height: 180px;" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();saveContentModal();}"></textarea>
+      <div class="modal-buttons">
+        <button class="modal-cancel" onclick="closeEditContentModal()">취소</button>
+        <button class="modal-submit" onclick="saveContentModal()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 회신내역 수정 모달 -->
+  <div class="modal-overlay" id="editReplyModal" onclick="closeEditReplyModal()">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 520px;">
+      <h2>회신내역 수정</h2>
+      <textarea id="editReplyText" placeholder="회신 내용을 입력하세요..." style="height: 180px;" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();saveReplyModal();}"></textarea>
+      <div class="modal-buttons">
+        <button class="modal-cancel" onclick="closeEditReplyModal()">취소</button>
+        <button class="modal-submit" onclick="saveReplyModal()">저장</button>
       </div>
     </div>
   </div>
@@ -1092,9 +1131,15 @@
       const request = requests.find(r => r.id === id);
       if (request) {
         try {
-          await db.collection(COLLECTION).doc(id).update({
-            completed: !request.completed
-          });
+          const newCompleted = !request.completed;
+          const updateData = {
+            completed: newCompleted
+          };
+          // 완료로 변경 시 상태도 '완료'로 자동 변경
+          if (newCompleted) {
+            updateData.status = '완료';
+          }
+          await db.collection(COLLECTION).doc(id).update(updateData);
         } catch (error) {
           console.error('완료 업데이트 오류:', error);
         }
@@ -1112,18 +1157,40 @@
       }
     }
 
-    // 요청내용 인라인 편집
+    // 요청내용 팝업 편집
     function startEditContent(id) {
-      editingContentId = id;
-      editingReplyId = null;
-      render();
-      setTimeout(() => {
-        const input = document.getElementById(`content-${id}`);
-        if (input) {
-          input.focus();
-          input.select();
+      const request = requests.find(r => r.id === id);
+      if (request) {
+        editingContentId = id;
+        editingReplyId = null;
+        document.getElementById('editContentText').value = request.content || '';
+        document.getElementById('editContentModal').classList.add('visible');
+        setTimeout(() => {
+          const textarea = document.getElementById('editContentText');
+          textarea.focus();
+          textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }, 10);
+      }
+    }
+
+    function closeEditContentModal() {
+      document.getElementById('editContentModal').classList.remove('visible');
+      editingContentId = null;
+    }
+
+    async function saveContentModal() {
+      if (!editingContentId) return;
+      const value = document.getElementById('editContentText').value.trim();
+      if (value) {
+        try {
+          await db.collection(COLLECTION).doc(editingContentId).update({
+            content: value
+          });
+        } catch (error) {
+          console.error('내용 저장 오류:', error);
         }
-      }, 10);
+      }
+      closeEditContentModal();
     }
 
     async function saveContent(id) {
@@ -1149,18 +1216,37 @@
       render();
     }
 
-    // 회신내역 인라인 편집
+    // 회신내역 팝업 편집
     function startEditReply(id) {
-      editingReplyId = id;
-      editingContentId = null;
-      render();
-      setTimeout(() => {
-        const input = document.getElementById(`reply-${id}`);
-        if (input) {
-          input.focus();
-          input.select();
-        }
-      }, 10);
+      const request = requests.find(r => r.id === id);
+      if (request) {
+        editingReplyId = id;
+        editingContentId = null;
+        document.getElementById('editReplyText').value = request.reply || '';
+        document.getElementById('editReplyModal').classList.add('visible');
+        setTimeout(() => {
+          const textarea = document.getElementById('editReplyText');
+          textarea.focus();
+          textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }, 10);
+      }
+    }
+
+    function closeEditReplyModal() {
+      document.getElementById('editReplyModal').classList.remove('visible');
+      editingReplyId = null;
+    }
+
+    async function saveReplyModal() {
+      if (!editingReplyId) return;
+      try {
+        await db.collection(COLLECTION).doc(editingReplyId).update({
+          reply: document.getElementById('editReplyText').value.trim()
+        });
+      } catch (error) {
+        console.error('회신 저장 오류:', error);
+      }
+      closeEditReplyModal();
     }
 
     async function saveReply(id) {
@@ -1194,14 +1280,17 @@
     }
 
     // 상태 뱃지 클래스
-    function getStatusClass(status) {
+    function getStatusClass(status, completed) {
+      if (completed) return 'completed-status';
       if (status === '확인중') return 'checking';
       if (status === '회신대기중') return 'waiting';
+      if (status === '완료') return 'completed-status';
       return 'none';
     }
 
     // 상태 표시 텍스트
-    function getStatusText(status) {
+    function getStatusText(status, completed) {
+      if (completed) return '완료';
       return status === '-' ? '대기' : status;
     }
 
@@ -1225,9 +1314,11 @@
         filtered = filtered.filter(r => r.completed);
       }
 
-      // 작성자 필터
-      if (currentAuthorFilter !== 'all') {
-        filtered = filtered.filter(r => r.author === currentAuthorFilter);
+      // 작성자 필터 (NY확인 = YJ가 작성한 것, YJ확인 = NY가 작성한 것)
+      if (currentAuthorFilter === 'NY') {
+        filtered = filtered.filter(r => r.author === 'YJ');
+      } else if (currentAuthorFilter === 'YJ') {
+        filtered = filtered.filter(r => r.author === 'NY');
       }
 
       const pending = filtered.filter(r => !r.completed);
@@ -1239,9 +1330,9 @@
       const totalCompleted = requests.filter(r => r.completed).length;
       const rate = total > 0 ? Math.round((totalCompleted / total) * 100) : 0;
 
-      // 작성자별 카운트
-      const totalNY = requests.filter(r => r.author === 'NY').length;
-      const totalYJ = requests.filter(r => r.author === 'YJ').length;
+      // 작성자별 카운트 (NY확인 = YJ작성 중 미완료, YJ확인 = NY작성 중 미완료)
+      const totalNY = requests.filter(r => r.author === 'YJ' && !r.completed).length;
+      const totalYJ = requests.filter(r => r.author === 'NY' && !r.completed).length;
 
       document.getElementById('totalCount').textContent = total;
       document.getElementById('pendingCount').textContent = totalPending;
@@ -1288,30 +1379,16 @@
               ${r.important ? '★' : '☆'}
             </button>
           </td>
-          <td class="content" ${editingContentId !== r.id ? `onclick="startEditContent('${r.id}')"` : ''}>
-            ${editingContentId === r.id ? `
-              <input type="text" 
-                id="content-${r.id}" 
-                class="inline-input"
-                value="${escapeHtml(r.content)}" 
-                onblur="saveContent('${r.id}')"
-                onkeydown="if(event.key==='Enter'){event.preventDefault();saveContent('${r.id}');}if(event.key==='Escape')cancelEditContent();">
-            ` : escapeHtml(r.content)}
+          <td class="content" onclick="startEditContent('${r.id}')">
+            ${escapeHtml(r.content)}
           </td>
           <td class="status">
-            <span class="status-badge ${getStatusClass(r.status)}" onclick="cycleStatus('${r.id}')">
-              ${getStatusText(r.status)}
+            <span class="status-badge ${getStatusClass(r.status, r.completed)}" onclick="cycleStatus('${r.id}')">
+              ${getStatusText(r.status, r.completed)}
             </span>
           </td>
-          <td class="reply ${!r.reply && editingReplyId !== r.id ? 'empty' : ''}" ${editingReplyId !== r.id ? `onclick="startEditReply('${r.id}')"` : ''}>
-            ${editingReplyId === r.id ? `
-              <input type="text" 
-                id="reply-${r.id}" 
-                class="inline-input"
-                value="${escapeHtml(r.reply || '')}" 
-                onblur="saveReply('${r.id}')"
-                onkeydown="if(event.key==='Enter'){event.preventDefault();saveReply('${r.id}');}if(event.key==='Escape')cancelEditReply();">
-            ` : (r.reply ? escapeHtml(r.reply) : '클릭하여 입력...')}
+          <td class="reply ${!r.reply ? 'empty' : ''}" onclick="startEditReply('${r.id}')">
+            ${r.reply ? escapeHtml(r.reply) : '클릭하여 입력...'}
           </td>
           <td class="complete">
             <input type="checkbox" class="complete-checkbox" 
