@@ -290,7 +290,7 @@
     th:nth-child(2), td:nth-child(2) { width: 80px; }   /* 작성자 */
     th:nth-child(3), td:nth-child(3) { width: 60px; }   /* 중요 */
     th:nth-child(4), td:nth-child(4) { width: 30%; }    /* 요청내용 */
-    th:nth-child(5), td:nth-child(5) { width: 90px; }   /* 상태 */
+    th:nth-child(5), td:nth-child(5) { width: 110px; }   /* 상태 */
     th:nth-child(6), td:nth-child(6) { width: 30%; }    /* 회신내역 */
     th:nth-child(7), td:nth-child(7) { width: 60px; }   /* 완료 */
     th:nth-child(8), td:nth-child(8) { width: 60px; }   /* 삭제 */
@@ -438,6 +438,7 @@
       cursor: pointer;
       transition: all 0.2s;
       user-select: none;
+      white-space: nowrap;
     }
 
     .status-badge:hover {
