@@ -173,6 +173,43 @@
       background-color: rgba(0,0,0,0.1);
     }
 
+    /* 이름별 필터 탭 색상 - 항상 표시 */
+    .author-filter .filter-tab[data-author="NY"] {
+      background-color: #fff0f3;
+      color: #9f1239;
+      border: 1px solid #ffccd5;
+    }
+
+    .author-filter .filter-tab[data-author="NY"].active {
+      background-color: #ffccd5;
+      color: #9f1239;
+      border-color: #f9a8d4;
+    }
+
+    .author-filter .filter-tab[data-author="YJ"] {
+      background-color: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .author-filter .filter-tab[data-author="YJ"].active {
+      background-color: #fde68a;
+      color: #92400e;
+      border-color: #fbbf24;
+    }
+
+    .author-filter .filter-tab[data-author="YO"] {
+      background-color: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .author-filter .filter-tab[data-author="YO"].active {
+      background-color: #bfdbfe;
+      color: #1e40af;
+      border-color: #60a5fa;
+    }
+
     .filter-tab:not(.active) .filter-count {
       background-color: #f0f0f0;
     }
@@ -286,14 +323,15 @@
     th.center { text-align: center; }
 
     /* 고정 열 너비 */
-    th:nth-child(1), td:nth-child(1) { width: 80px; }   /* 날짜 */
-    th:nth-child(2), td:nth-child(2) { width: 80px; }   /* 작성자 */
-    th:nth-child(3), td:nth-child(3) { width: 60px; }   /* 중요 */
-    th:nth-child(4), td:nth-child(4) { width: 30%; }    /* 요청내용 */
-    th:nth-child(5), td:nth-child(5) { width: 110px; }   /* 상태 */
-    th:nth-child(6), td:nth-child(6) { width: 30%; }    /* 회신내역 */
-    th:nth-child(7), td:nth-child(7) { width: 60px; }   /* 완료 */
-    th:nth-child(8), td:nth-child(8) { width: 60px; }   /* 삭제 */
+    th:nth-child(1), td:nth-child(1) { width: 70px; }   /* 날짜 */
+    th:nth-child(2), td:nth-child(2) { width: 90px; }   /* 작성자 */
+    th:nth-child(3), td:nth-child(3) { width: 90px; }   /* 요청자 */
+    th:nth-child(4), td:nth-child(4) { width: 50px; }   /* 중요 */
+    th:nth-child(5), td:nth-child(5) { width: 24%; }    /* 요청내용 */
+    th:nth-child(6), td:nth-child(6) { width: 100px; }   /* 상태 */
+    th:nth-child(7), td:nth-child(7) { width: 24%; }    /* 회신내역 */
+    th:nth-child(8), td:nth-child(8) { width: 50px; }   /* 완료 */
+    th:nth-child(9), td:nth-child(9) { width: 50px; }   /* 삭제 */
 
     tbody tr {
       transition: all 0.15s ease;
@@ -349,6 +387,22 @@
     .author-select:focus {
       border-color: #045b67;
       box-shadow: 0 0 0 2px rgba(4, 91, 103, 0.1);
+    }
+
+    /* 이름별 색상 */
+    .author-select.color-NY {
+      background-color: #fff0f3;
+      border-color: #ffccd5;
+    }
+
+    .author-select.color-YJ {
+      background-color: #fffbeb;
+      border-color: #fde68a;
+    }
+
+    .author-select.color-YO {
+      background-color: #eff6ff;
+      border-color: #bfdbfe;
     }
 
     td.star {
@@ -806,10 +860,13 @@
               전체<span class="filter-count" id="filterAuthorAll">0</span>
             </button>
             <button class="filter-tab" data-author="NY" onclick="setAuthorFilter('NY')">
-              NY확인<span class="filter-count" id="filterNY">0</span>
+              나영확인<span class="filter-count" id="filterNY">0</span>
             </button>
             <button class="filter-tab" data-author="YJ" onclick="setAuthorFilter('YJ')">
-              YJ확인<span class="filter-count" id="filterYJ">0</span>
+              유진확인<span class="filter-count" id="filterYJ">0</span>
+            </button>
+            <button class="filter-tab" data-author="YO" onclick="setAuthorFilter('YO')">
+              영옥확인<span class="filter-count" id="filterYO">0</span>
             </button>
           </div>
         </div>
@@ -835,6 +892,7 @@
             <tr>
               <th class="center">날짜</th>
               <th class="center">작성자</th>
+              <th class="center">요청자</th>
               <th class="center">중요</th>
               <th>요청내용</th>
               <th class="center">상태</th>
@@ -859,6 +917,7 @@
             <tr>
               <th class="center">날짜</th>
               <th class="center">작성자</th>
+              <th class="center">요청자</th>
               <th class="center">중요</th>
               <th>요청내용</th>
               <th class="center">상태</th>
@@ -894,8 +953,18 @@
         <label for="newAuthor">작성자</label>
         <select id="newAuthor" class="author-select-modal">
           <option value="">선택</option>
-          <option value="NY">NY</option>
-          <option value="YJ">YJ</option>
+          <option value="NY">나영</option>
+          <option value="YJ">유진</option>
+          <option value="YO">영옥</option>
+        </select>
+      </div>
+      <div class="modal-author-select">
+        <label for="newAssignee">요청자</label>
+        <select id="newAssignee" class="author-select-modal">
+          <option value="">선택</option>
+          <option value="NY">나영</option>
+          <option value="YJ">유진</option>
+          <option value="YO">영옥</option>
         </select>
       </div>
       <textarea id="newContent" placeholder="요청 내용을 입력하세요..." onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();addRequest();}"></textarea>
@@ -1044,15 +1113,17 @@
       document.getElementById('newModal').classList.remove('visible');
       document.getElementById('newContent').value = '';
       document.getElementById('newAuthor').value = '';
+      document.getElementById('newAssignee').value = '';
     }
 
     async function addRequest() {
       const content = document.getElementById('newContent').value.trim();
       const author = document.getElementById('newAuthor').value;
+      const assignee = document.getElementById('newAssignee').value;
       if (!content) return;
 
       const today = new Date().toISOString().split('T')[0];
-      
+
       try {
         await db.collection(COLLECTION).add({
           date: today,
@@ -1062,6 +1133,7 @@
           important: false,
           completed: false,
           author: author,
+          assignee: assignee,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         closeNewModal();
@@ -1155,6 +1227,17 @@
         });
       } catch (error) {
         console.error('작성자 업데이트 오류:', error);
+      }
+    }
+
+    // 요청자 변경
+    async function changeAssignee(id, assignee) {
+      try {
+        await db.collection(COLLECTION).doc(id).update({
+          assignee: assignee
+        });
+      } catch (error) {
+        console.error('요청자 업데이트 오류:', error);
       }
     }
 
@@ -1315,11 +1398,13 @@
         filtered = filtered.filter(r => r.completed);
       }
 
-      // 작성자 필터 (NY확인 = YJ가 작성한 것, YJ확인 = NY가 작성한 것)
+      // 요청자 필터 (NY확인 = NY가 요청자인 것, YJ확인 = YJ가 요청자인 것, YO확인 = YO가 요청자인 것)
       if (currentAuthorFilter === 'NY') {
-        filtered = filtered.filter(r => r.author === 'YJ');
+        filtered = filtered.filter(r => r.assignee === 'NY');
       } else if (currentAuthorFilter === 'YJ') {
-        filtered = filtered.filter(r => r.author === 'NY');
+        filtered = filtered.filter(r => r.assignee === 'YJ');
+      } else if (currentAuthorFilter === 'YO') {
+        filtered = filtered.filter(r => r.assignee === 'YO');
       }
 
       const pending = filtered.filter(r => !r.completed);
@@ -1331,9 +1416,10 @@
       const totalCompleted = requests.filter(r => r.completed).length;
       const rate = total > 0 ? Math.round((totalCompleted / total) * 100) : 0;
 
-      // 작성자별 카운트 (NY확인 = YJ작성 중 미완료, YJ확인 = NY작성 중 미완료)
-      const totalNY = requests.filter(r => r.author === 'YJ' && !r.completed).length;
-      const totalYJ = requests.filter(r => r.author === 'NY' && !r.completed).length;
+      // 요청자별 카운트 (NY확인 = NY가 요청자인 미완료, YJ확인 = YJ가 요청자인 미완료, YO확인 = YO가 요청자인 미완료)
+      const totalNY = requests.filter(r => r.assignee === 'NY' && !r.completed).length;
+      const totalYJ = requests.filter(r => r.assignee === 'YJ' && !r.completed).length;
+      const totalYO = requests.filter(r => r.assignee === 'YO' && !r.completed).length;
 
       document.getElementById('totalCount').textContent = total;
       document.getElementById('pendingCount').textContent = totalPending;
@@ -1347,6 +1433,7 @@
       document.getElementById('filterAuthorAll').textContent = total;
       document.getElementById('filterNY').textContent = totalNY;
       document.getElementById('filterYJ').textContent = totalYJ;
+      document.getElementById('filterYO').textContent = totalYO;
 
       // 테이블 렌더
       renderTable('pendingTbody', pending, 'pendingEmpty');
@@ -1369,10 +1456,19 @@
         <tr class="${r.completed ? 'completed-row' : ''}">
           <td class="date">${formatDate(r.date)}</td>
           <td class="author">
-            <select class="author-select" onchange="changeAuthor('${r.id}', this.value)">
+            <select class="author-select ${r.author ? 'color-' + r.author : ''}" onchange="changeAuthor('${r.id}', this.value)">
               <option value="" ${!r.author ? 'selected' : ''}>-</option>
-              <option value="NY" ${r.author === 'NY' ? 'selected' : ''}>NY</option>
-              <option value="YJ" ${r.author === 'YJ' ? 'selected' : ''}>YJ</option>
+              <option value="NY" ${r.author === 'NY' ? 'selected' : ''}>나영</option>
+              <option value="YJ" ${r.author === 'YJ' ? 'selected' : ''}>유진</option>
+              <option value="YO" ${r.author === 'YO' ? 'selected' : ''}>영옥</option>
+            </select>
+          </td>
+          <td class="author">
+            <select class="author-select ${r.assignee ? 'color-' + r.assignee : ''}" onchange="changeAssignee('${r.id}', this.value)">
+              <option value="" ${!r.assignee ? 'selected' : ''}>-</option>
+              <option value="NY" ${r.assignee === 'NY' ? 'selected' : ''}>나영</option>
+              <option value="YJ" ${r.assignee === 'YJ' ? 'selected' : ''}>유진</option>
+              <option value="YO" ${r.assignee === 'YO' ? 'selected' : ''}>영옥</option>
             </select>
           </td>
           <td class="star">
@@ -1392,8 +1488,8 @@
             ${r.reply ? escapeHtml(r.reply) : '클릭하여 입력...'}
           </td>
           <td class="complete">
-            <input type="checkbox" class="complete-checkbox" 
-              ${r.completed ? 'checked' : ''} 
+            <input type="checkbox" class="complete-checkbox"
+              ${r.completed ? 'checked' : ''}
               onchange="toggleComplete('${r.id}')">
           </td>
           <td class="actions">
