@@ -210,6 +210,18 @@
       border-color: #60a5fa;
     }
 
+    .author-filter .filter-tab[data-author="YR"] {
+      background-color: #f3e8ff;
+      color: #7c3aed;
+      border: 1px solid #d8b4fe;
+    }
+
+    .author-filter .filter-tab[data-author="YR"].active {
+      background-color: #d8b4fe;
+      color: #7c3aed;
+      border-color: #a78bfa;
+    }
+
     .filter-tab:not(.active) .filter-count {
       background-color: #f0f0f0;
     }
@@ -403,6 +415,11 @@
     .author-select.color-YO {
       background-color: #eff6ff;
       border-color: #bfdbfe;
+    }
+
+    .author-select.color-YR {
+      background-color: #f3e8ff;
+      border-color: #d8b4fe;
     }
 
     td.star {
@@ -865,6 +882,9 @@
             <button class="filter-tab" data-author="YJ" onclick="setAuthorFilter('YJ')">
               유진확인<span class="filter-count" id="filterYJ">0</span>
             </button>
+            <button class="filter-tab" data-author="YR" onclick="setAuthorFilter('YR')">
+              유림확인<span class="filter-count" id="filterYR">0</span>
+            </button>
             <button class="filter-tab" data-author="YO" onclick="setAuthorFilter('YO')">
               영옥확인<span class="filter-count" id="filterYO">0</span>
             </button>
@@ -955,6 +975,7 @@
           <option value="">선택</option>
           <option value="NY">나영</option>
           <option value="YJ">유진</option>
+          <option value="YR">유림</option>
           <option value="YO">영옥</option>
         </select>
       </div>
@@ -964,6 +985,7 @@
           <option value="">선택</option>
           <option value="NY">나영</option>
           <option value="YJ">유진</option>
+          <option value="YR">유림</option>
           <option value="YO">영옥</option>
         </select>
       </div>
@@ -1405,6 +1427,8 @@
         filtered = filtered.filter(r => r.assignee === 'YJ');
       } else if (currentAuthorFilter === 'YO') {
         filtered = filtered.filter(r => r.assignee === 'YO');
+      } else if (currentAuthorFilter === 'YR') {
+        filtered = filtered.filter(r => r.assignee === 'YR');
       }
 
       const pending = filtered.filter(r => !r.completed);
@@ -1416,10 +1440,11 @@
       const totalCompleted = requests.filter(r => r.completed).length;
       const rate = total > 0 ? Math.round((totalCompleted / total) * 100) : 0;
 
-      // 요청자별 카운트 (NY확인 = NY가 요청자인 미완료, YJ확인 = YJ가 요청자인 미완료, YO확인 = YO가 요청자인 미완료)
+      // 요청자별 카운트
       const totalNY = requests.filter(r => r.assignee === 'NY' && !r.completed).length;
       const totalYJ = requests.filter(r => r.assignee === 'YJ' && !r.completed).length;
       const totalYO = requests.filter(r => r.assignee === 'YO' && !r.completed).length;
+      const totalYR = requests.filter(r => r.assignee === 'YR' && !r.completed).length;
 
       document.getElementById('totalCount').textContent = total;
       document.getElementById('pendingCount').textContent = totalPending;
@@ -1434,6 +1459,7 @@
       document.getElementById('filterNY').textContent = totalNY;
       document.getElementById('filterYJ').textContent = totalYJ;
       document.getElementById('filterYO').textContent = totalYO;
+      document.getElementById('filterYR').textContent = totalYR;
 
       // 테이블 렌더
       renderTable('pendingTbody', pending, 'pendingEmpty');
@@ -1460,6 +1486,7 @@
               <option value="" ${!r.author ? 'selected' : ''}>-</option>
               <option value="NY" ${r.author === 'NY' ? 'selected' : ''}>나영</option>
               <option value="YJ" ${r.author === 'YJ' ? 'selected' : ''}>유진</option>
+              <option value="YR" ${r.author === 'YR' ? 'selected' : ''}>유림</option>
               <option value="YO" ${r.author === 'YO' ? 'selected' : ''}>영옥</option>
             </select>
           </td>
@@ -1468,6 +1495,7 @@
               <option value="" ${!r.assignee ? 'selected' : ''}>-</option>
               <option value="NY" ${r.assignee === 'NY' ? 'selected' : ''}>나영</option>
               <option value="YJ" ${r.assignee === 'YJ' ? 'selected' : ''}>유진</option>
+              <option value="YR" ${r.assignee === 'YR' ? 'selected' : ''}>유림</option>
               <option value="YO" ${r.assignee === 'YO' ? 'selected' : ''}>영옥</option>
             </select>
           </td>
